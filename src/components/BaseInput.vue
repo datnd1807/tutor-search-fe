@@ -143,6 +143,15 @@ export default {
       description: "Input type",
       default: "text",
     },
+    length:{
+      type: String,
+      description:"Input lenght",
+      default:"50"
+    },
+    width:{
+      type:String,
+      description:"Input width",
+    }
   },
   data() {
     return {

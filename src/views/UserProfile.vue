@@ -4,7 +4,7 @@
       class="header pb-8 pt-5 pt-lg-8 d-flex align-items-center"
       style="
         min-height: 600px;
-        background-image: url(img/theme/profile-cover.jpg);
+        background-image: url(img/theme/cover-img.jpg);
         background-size: cover;
         background-position: center top;
       "
@@ -13,37 +13,28 @@
 
       <div class="container-fluid d-flex align-items-center">
         <div class="row">
-          <div class="col-lg-7 col-md-10">
-            <h1 class="display-2 text-white">Hello {{ modelData.fullname }}</h1>
-            <p class="text-white mt-0 mb-5">
-              This is your profile page. You can see the progress you've made
-              with your work and manage your projects or assigned tasks
-            </p>
-            >
+          <div class="col">
+            <h2 class="display-2 text-white">
+              Hello,<br />{{ userProfile.fullname }}
+            </h2>
           </div>
         </div>
       </div>
     </base-header>
 
-    <div class="container-fluid mt--7">
+    <div class="container-fluid mt--9">
       <div class="row">
         <div class="col-xl-12 order-xl-2 mb-5 mb-xl-0">
           <div class="card card-profile shadow">
             <div class="row justify-content-center">
               <div class="col-lg-3 order-lg-2">
-                <div class="card-profile-image">
-                  <a href="#">
-                    <img
-                      v-if="(modelData.avatarImageLink != '')"
-                      :src="modelData.avatarImageLink"
-                      class="rounded-circle"
-                    />
-                    <img
-                      v-else
-                      src="./Tables/anh-dai-dien-FB-200.jpg"
-                      class="rounded-circle"
-                    />
-                  </a>
+                <div class="card-profile-image pro-avatar">
+                  <img
+                    v-if="userProfile.avatarImageLink != ''"
+                    :src="userProfile.avatarImageLink"
+                    class="rounded-circle"
+                  />
+                  <img v-else :src="avatar" class="rounded-circle" />
                 </div>
               </div>
             </div>
@@ -55,8 +46,7 @@
                 <div class="col">
                   <div
                     class="card-profile-stats d-flex justify-content-center mt-md-5"
-                  >
-                  </div>
+                  ></div>
                 </div>
               </div>
               <div class="col-xl-12 order-xl-1">
@@ -68,16 +58,20 @@
                       </div>
                       <div class="col-4 text-right">
                         <el-button
-                          type="primary"
-                          size="small"
-                          @click="openSave()"
-                          >Save</el-button
-                        >
-                        <el-button
+                          v-if="userProfile.roleId == 1"
                           type="primary"
                           size="small"
                           v-on:click="editProfile = false"
+                          :disabled="disableButton"
                           >Edit</el-button
+                        >
+                        <el-button
+                          v-if="userProfile.roleId == 1"
+                          type="primary"
+                          size="small"
+                          @click="openSave()"
+                          :disabled="disableButton"
+                          >Save</el-button
                         >
                       </div>
                     </div>
@@ -85,10 +79,10 @@
                   <template>
                     <el-form
                       ref="form"
-                      v-model="modelData"
+                      v-model="userProfile"
                       label-width="120px"
                       :inline="true"
-                      class="demo-form-inline"
+                      v-loading="loading"
                     >
                       <h6 class="heading-small text-muted mb-4">
                         User information
@@ -104,15 +98,14 @@
                               class="Light_Shadow"
                             >
                               <el-input
-                                v-model="modelData.fullname"
+                                v-model="userProfile.fullname"
                                 :readonly="editProfile"
                                 v-on:input="checkFullname()"
-                                tr
                               ></el-input>
                             </div>
                             <div v-else>
                               <el-input
-                                v-model="modelData.fullname"
+                                v-model="userProfile.fullname"
                                 :readonly="editProfile"
                                 v-on:input="checkFullname()"
                               ></el-input>
@@ -135,7 +128,7 @@
                               class="Light_Shadow"
                             >
                               <el-select
-                                v-model="modelData.gender"
+                                v-model="userProfile.gender"
                                 placeholder="Select"
                               >
                                 <el-option
@@ -149,7 +142,7 @@
                             </div>
                             <div v-else>
                               <el-select
-                                v-model="modelData.gender"
+                                v-model="userProfile.gender"
                                 placeholder="Select"
                               >
                                 <el-option
@@ -171,25 +164,27 @@
                               class="Light_Shadow"
                             >
                               <el-date-picker
-                                v-model="modelData.birthday"
+                                v-model="userProfile.birthday"
                                 type="date"
                                 placeholder="Pick a day"
                                 :picker-options="pickerOption"
                                 :readonly="editProfile"
                                 :clearable="false"
-                                @change="formatDate(modelData.birthday)"
+                                @change="formatDate(userProfile.birthday)"
+                                :editable="false"
                               >
                               </el-date-picker>
                             </div>
                             <div v-else>
                               <el-date-picker
-                                v-model="modelData.birthday"
+                                v-model="userProfile.birthday"
                                 type="date"
                                 placeholder="Pick a day"
                                 :picker-options="pickerOption"
                                 :readonly="editProfile"
                                 :clearable="false"
-                                @change="formatDate(modelData.birthday)"
+                                :editable="false"
+                                @change="formatDate(userProfile.birthday)"
                               >
                               </el-date-picker>
                             </div>
@@ -205,14 +200,14 @@
                               class="Light_Shadow"
                             >
                               <el-input
-                                v-model="modelData.address"
+                                v-model="userProfile.address"
                                 :readonly="editProfile"
                                 v-on:input="checkAddress()"
                               ></el-input>
                             </div>
                             <div v-else>
                               <el-input
-                                v-model="modelData.address"
+                                v-model="userProfile.address"
                                 :readonly="editProfile"
                                 v-on:input="checkAddress()"
                               ></el-input>
@@ -221,7 +216,7 @@
                               title="Address can not be blank"
                               type="error"
                               show-icon
-                              :hidden="disableAlertAddress"
+                              :hidden="disableAlertAddess"
                               :closable="false"
                             >
                             </el-alert>
@@ -239,31 +234,10 @@
                             <label class="text-search mr-2" for="select-role"
                               >Email</label
                             >
-                            <div
-                              v-if="editProfile == false"
-                              class="Light_Shadow"
-                            >
-                              <el-input
-                                v-model="modelData.email"
-                                :readonly="editProfile"
-                                v-on:input="checkEmail"
-                              ></el-input>
-                            </div>
-                            <div v-else>
-                              <el-input
-                                v-model="modelData.email"
-                                :readonly="editProfile"
-                                v-on:input="checkEmail"
-                              ></el-input>
-                            </div>
-                            <el-alert
-                              title="Email wrong format"
-                              type="error"
-                              show-icon
-                              :hidden="disableAlertEmail"
-                              :closable="false"
-                            >
-                            </el-alert>
+                            <el-input
+                              v-model="userProfile.email"
+                              :readonly="true"
+                            ></el-input>
                           </div>
                           <div class="col-lg-3">
                             <label class="text-search mr-2" for="select-role"
@@ -274,20 +248,20 @@
                               class="Light_Shadow"
                             >
                               <el-input
-                                v-model="modelData.phone"
+                                v-model="userProfile.phone"
                                 :readonly="editProfile"
                                 v-on:input="checkPhone"
                               ></el-input>
                             </div>
                             <div v-else>
                               <el-input
-                                v-model="modelData.phone"
+                                v-model="userProfile.phone"
                                 :readonly="editProfile"
                                 v-on:input="checkPhone"
                               ></el-input>
                             </div>
                             <el-alert
-                              title="Phone must be a number"
+                              title="Phone must be a number (8 ~ 15)"
                               type="error"
                               show-icon
                               :hidden="disableAlertPhone"
@@ -308,14 +282,15 @@
                           <div v-if="editProfile == false" class="Light_Shadow">
                             <el-input
                               type="textarea"
-                              v-model="modelData.description"
+                              maxlength="150"
+                              v-model="userProfile.description"
                               :readonly="editProfile"
                             ></el-input>
                           </div>
                           <div v-else>
                             <el-input
                               type="textarea"
-                              v-model="modelData.description"
+                              v-model="userProfile.description"
                               :readonly="editProfile"
                             ></el-input>
                           </div>
@@ -334,16 +309,24 @@
 </template>
 <script>
 import moment from "moment";
-import { mapState, mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 export default {
   name: "user-profile",
+  computed: {
+    ...mapGetters(["getAccountManager"]),
+    userProfile() {
+      return this.getAccountManager;
+    },
+  },
   data() {
     return {
+      avatar: "../assets/avatar_default.jpg",
+      disableButton: false,
       editProfile: true,
       disableAlertFullname: true,
-      disableAlertAddress: true,
-      disableAlertEmail: true,
+      disableAlertAddess: true,
       disableAlertPhone: true,
+      loading: false,
       genderList: [{ gender: "Male" }, { gender: "Female" }],
       pickerOption: {
         disabledDate(time) {
@@ -352,26 +335,21 @@ export default {
       },
     };
   },
-  computed: {
-    ...mapGetters(["getAccountManager"]),
-    modelData() {
-      return this.getAccountManager;
-    },
-  },
   methods: {
     ...mapActions(["getAccountManagerById", "updateAccount"]),
-    async init() {
-      const data1 = await this.getAccountManagerById();
-    },
     formatDate(value) {
       var date = moment(new Date(value)).format("YYYY-MM-DD");
-      this.modelData.birthday = date;
+      this.userProfile.birthday = date;
     },
     checkFullname() {
       if (
-        this.modelData.fullname == "" ||
-        !this.modelData.fullname.match(/^[a-zA-Z\s]+$/) ||
-        this.modelData.fullname.length > 50
+        this.userProfile.fullname.trim() == "" ||
+        !this.userProfile.fullname
+          .toLowerCase()
+          .match(
+            /^[a-zA-Z\saàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệfghiìỉĩíịjklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvwxyỳỷỹý]+$/
+          ) ||
+        this.userProfile.fullname.length > 100
       ) {
         this.disableAlertFullname = false;
       } else {
@@ -379,30 +357,21 @@ export default {
       }
     },
     checkAddress() {
-      if (this.modelData.address == "" || this.modelData.address.length > 100) {
-        this.disableAlertAddress = false;
-      } else {
-        this.disableAlertAddress = true;
-      }
-    },
-    checkEmail() {
       if (
-        this.modelData.email == "" ||
-        this.modelData.email.length > 100 ||
-        !this.modelData.email.match(
-          /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/
-        )
+        this.userProfile.address == "" ||
+        this.userProfile.address.length > 100
       ) {
-        this.disableAlertEmail = false;
+        this.disableAlertAddess = false;
       } else {
-        this.disableAlertEmail = true;
+        this.disableAlertAddess = true;
       }
     },
     checkPhone() {
       if (
-        this.modelData.phone == "" ||
-        this.modelData.phone.length > 20 ||
-        !this.modelData.phone.match(/[0-9]+/)
+        this.userProfile.phone == "" ||
+        this.userProfile.phone.length > 15 ||
+        this.userProfile.phone.length < 8 ||
+        !this.userProfile.phone.match(/^[0-9]*$/)
       ) {
         this.disableAlertPhone = false;
       } else {
@@ -412,8 +381,7 @@ export default {
     openSave() {
       if (
         this.disableAlertFullname &&
-        this.disableAlertAddress &&
-        this.disableAlertEmail &&
+        this.disableAlertAddess &&
         this.disableAlertPhone &&
         !this.editProfile
       ) {
@@ -423,11 +391,22 @@ export default {
           type: "warning",
         })
           .then(() => {
-            this.updateAccount(this.modelData);
-            this.editProfile = true;
-            this.$message({
-              type: "success",
-              message: "Save completed",
+            this.disableButton = true;
+            this.loading = true;
+            this.userProfile.createdBy = JSON.parse(
+              localStorage.getItem("user")
+            ).id;
+            this.updateAccount(this.userProfile).then((response) => {
+              if (response == 204) {
+                this.disableButton = false;
+                this.editProfile = true;
+                this.loading = false;
+                this.$message({
+                  type: "success",
+                  message: "Save completed",
+                });
+                localStorage.setItem("user", JSON.stringify(this.userProfile));
+              }
             });
           })
           .catch(() => {
@@ -438,20 +417,35 @@ export default {
           });
       }
     },
+    init() {
+      this.getAccountManagerById(JSON.parse(localStorage.getItem("user")).id);
+    },
   },
   mounted() {
     this.init();
+  },
+  beforeDestroy() {
+    if (JSON.parse(localStorage.getItem("user")) != null) {
+      this.init();
+    }
   },
 };
 </script>
 <style scoped lang=scss >
 .text-search {
   margin-top: 8px;
-  font-weight: bolder;
+  font-weight: bold;
   font-size: 14px;
   color: #606266;
 }
 .Light_Shadow {
   box-shadow: 0 3px 15px 0 rgba(252, 15, 15, 0.267);
+}
+.pro-avatar img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 1);
 }
 </style>

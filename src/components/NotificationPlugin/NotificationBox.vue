@@ -6,7 +6,8 @@
 <script>
 import firebase from "firebase/app";
 import "firebase/messaging";
-const sound = require("./zapsplat_multimedia_notification_pop_message_tooltip_small_click_009_63079.mp3");
+import { mapActions } from "vuex";
+import FirebaseAuth from "../../firebase";
 export default {
   name: "NotificationBox",
   components: {},
@@ -17,33 +18,49 @@ export default {
       subject: "",
       userimg: "",
       messaging: firebase.messaging(),
-      currentMessage: "",
-      soundNoti: sound 
     };
   },
 
   methods: {
+    ...mapActions([
+      "getAllCoursesByAdmin",
+      "getTutorPending",
+      "getFeedbacks",
+      "getAllFeedbacks",
+      "getAllTutorsUpdating",
+    ]),
     receiveMessage() {
       try {
         firebase.messaging().onMessage((payload) => {
+          if (payload.notification.title == "Your account has been inactived") {
+            FirebaseAuth.logout();
+          } else if (JSON.parse(localStorage.getItem("user")).roleId == 2) {
+            var filter = {
+              managerId: JSON.parse(localStorage.getItem("user")).id,
+            };
+            this.getAllCoursesByAdmin(filter);
+            this.getFeedbacks(JSON.parse(localStorage.getItem("user")).id);
+          } else {
+            this.getAllFeedbacks();
+            this.getAllCoursesByAdmin("");
+          }
+          this.getTutorPending();
+          this.getAllTutorsUpdating();
           // debugger
-          this.currentMessage = payload;
           this.showNotification(
-            payload.data.username,
-            payload.data.message
+            payload.notification.title,
+            payload.notification.body
           );
         });
       } catch (e) {
         console.log(e);
       }
     },
-    showNotification(username, message) {
-      var sound = new Audio(this.soundNoti);
-      sound.play();
+    showNotification(title, body) {
       this.$notify({
-        title: username,
-        message: message,
-        type: 'warning'
+        title: title,
+        message: body,
+        type: "warning",
       });
     },
   },

@@ -6,11 +6,14 @@ Vue.use(Router)
 
 export default new Router({
   linkExactActiveClass: 'active',
+  mode: "history",
   routes: [
+
     {
       path: '/',
       redirect: 'dashboard',
       component: DashboardLayout,
+      meta: { requiresAuth: true },
       children: [
         {
           path: '/dashboard',
@@ -21,19 +24,9 @@ export default new Router({
           component: () => import(/* webpackChunkName: "demo" */ './views/Dashboard.vue')
         },
         {
-          path: '/accounts',
-          name: 'accounts management',
-          component: () => import(/* webpackChunkName: "demo" */ './views/Accounts.vue')
-        },
-        {
-          path: '/managers',
-          name: 'managers management',
-          component: () => import(/* webpackChunkName: "demo" */ './views/Managers.vue')
-        },
-        {
           path: '/courses',
           name: 'courses management',
-          component: () => import(/* webpackChunkName: "demo" */ './views/Courses.vue')
+          component: () => import(/* webpackChunkName: "demo" */ './views/Course/Courses.vue')
         },
         {
           path: '/profile',
@@ -43,26 +36,61 @@ export default new Router({
         {
           path: '/tutors',
           name: 'tutors management',
-          component: () => import(/* webpackChunkName: "demo" */ './views/Tables/Tutors.vue')
+          component: () => import(/* webpackChunkName: "demo" */ './views/Tutor/Tutors.vue')
+        },
+        {
+          path: '/tutees',
+          name: 'tutees management',
+          component: () => import(/* webpackChunkName: "demo" */ './views/Tutee/Tutees.vue')
         },
         {
           path: '/feedbacks',
           name: 'feedback confirmation',
-          component: () => import(/* webpackChunkName: "demo" */ './views/Tables/Feedback.vue')
+          component: () => import(/* webpackChunkName: "demo" */ './views/Feedback/Feedback.vue')
+        },
+        {
+          path: '/membership',
+          name: 'membership & fees',
+          component: () => import(/* webpackChunkName: "demo" */ './views/FeeMembership/Membership.vue')
+        },
+        {
+          path: '/manager',
+          name: 'manager management',
+          component: () => import(/* webpackChunkName: "demo" */ './views/Manager/Manager.vue')
+        },
+        {
+          path: '/classes',
+          name: 'classes and subjects management',
+          component: () => import(/* webpackChunkName: "demo" */ './views/Class/Classes.vue')
         }
       ]
     },
     {
-      path: '/',
+      path: '/login',
       redirect: 'login',
       component: AuthLayout,
+      meta: { requiresVisitor: true },
       children: [
         {
           path: '/login',
-          name: 'login',
           component: () => import(/* webpackChunkName: "demo" */ './views/Login.vue')
         }
       ]
-    }
+    },
+    {
+      path: '/login',
+      redirect: 'login',
+      component: AuthLayout,
+      meta: { requiresVisitor: true },
+      children: [
+        {
+          path: '/login',
+          component: () => import(/* webpackChunkName: "demo" */ './views/Login.vue')
+        }
+      ]
+    },
+    { path: '/404', meta: { requiresFail: true },component: () => import(/* webpackChunkName: "demo" */ './views/PageNotFound/PageNotFound.vue') },  
+    { path: '/:pathMatch(.*)*', redirect: '/404' },  
   ]
 })
+

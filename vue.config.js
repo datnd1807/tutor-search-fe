@@ -23,5 +23,6 @@ module.exports = {
   },
   devServer: {
     proxy: 'https://tutorsearchsystem.azurewebsites.net/',
+    // https: true,
 }
 };

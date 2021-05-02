@@ -1,0 +1,76 @@
+<template>
+  <div class="col">
+    <template :model="data">
+      <el-badge class="item">
+        <el-button size="small" type="text" @click="handleDialog(data.email)"
+          >Certificate</el-button
+        >
+      </el-badge>
+      <el-dialog :visible.sync="dialogVisible" width="30%" top="20px">
+        <span slot="title" class="fontSize"
+          ><i class="el-icon-picture"></i>Certificate</span
+        >
+        <el-scrollbar
+          v-if="images.length != 0"
+          wrap-style="max-height: 700px; min-height: 350px;"
+        >
+          <el-image
+            style="width: 550px; height: 300px"
+            v-for="(url, index) in images"
+            :key="index"
+            :src="url"
+            fit="contain"
+            lazy
+          ></el-image>
+        </el-scrollbar>
+        <p v-else class="center-screen">No certificate</p>
+        <br />
+      </el-dialog>
+    </template>
+  </div>
+</template>
+<script>
+import { mapGetters } from "vuex";
+export default {
+  name: "certificate",
+  computed: {
+    ...mapGetters(["getImage"]),
+  },
+  props: {
+    data: {},
+  },
+  data() {
+    return {
+      dialogVisible: false,
+      images: [],
+    };
+  },
+  methods: {
+    handleDialog(email) {
+      this.images = [];
+      this.listImage = "";
+      this.dialogVisible = true;
+      var list = Object.values(this.getImage).filter(
+        (image) => image.ownerEmail === email
+      );
+      for (const value of list) {
+        this.images.push(value.imageLink);
+      }
+    },
+  },
+};
+</script>
+<style scoped lang=scss>
+.fontSize {
+  font-size: 20px;
+  font-weight: bold;
+}
+.center-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 35vh;
+}
+</style>
